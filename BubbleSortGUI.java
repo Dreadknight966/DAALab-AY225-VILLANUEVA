@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class SortVisualizerGUI extends JFrame {
+public class BubbleSortGUI extends JFrame {
 
     /* ===================== DATA ===================== */
     private int[] originalArray;
@@ -41,7 +41,7 @@ public class SortVisualizerGUI extends JFrame {
     private final Color COMPARE = new Color(255, 193, 7);
     private final Color SORTED = new Color(60, 180, 100);
 
-    public SortVisualizerGUI() {
+    public BubbleSortGUI() {
         setTitle("Sorting Algorithm Visualizer");
         setSize(1200, 650);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -130,20 +130,16 @@ public class SortVisualizerGUI extends JFrame {
             while ((line = br.readLine()) != null)
                 list.add(Integer.parseInt(line.trim()));
 
-            originalArray = list.stream().mapToInt(i -> i).toArray();
+            originalArray = list.stream().mapToInt(Integer::intValue).toArray();
             maxValue = findMax(originalArray);
 
-            // Initialize visual array
             visualArray = originalArray.clone();
 
-            // Measure algorithm time
             algorithmTimeSeconds = measureAlgorithmTime();
 
-            // Generate sorted array for display
             int[] sortedArray = originalArray.clone();
             sortArray(sortedArray);
 
-            // Update text area with dataset info, original, sorted arrays
             outputArea.setText(
                     "📁 Dataset: " + file.getName() + "\n" +
                     "Array Size: " + originalArray.length + "\n" +
@@ -166,10 +162,10 @@ public class SortVisualizerGUI extends JFrame {
     /* ===================== ARRAY HELPERS ===================== */
     private String arrayToString(int[] arr) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arr.length; i++) {
-            sb.append(arr[i]);
-            if (i < arr.length - 1) sb.append(", ");
-            if ((i + 1) % 20 == 0) sb.append("\n"); // break line every 20 numbers
+        for (int k = 0; k < arr.length; k++) {
+            sb.append(arr[k]);
+            if (k < arr.length - 1) sb.append(", ");
+            if ((k + 1) % 20 == 0) sb.append("\n");
         }
         return sb.toString();
     }
@@ -193,13 +189,58 @@ public class SortVisualizerGUI extends JFrame {
     }
 
     /* ===================== PURE SORTS ===================== */
-    private void bubbleSortPure(int[] a) { for (int i = 0; i < a.length - 1; i++) { boolean swapped=false; for (int j=0;j<a.length-i-1;j++){if(a[j]<a[j+1]){swap(a,j,j+1);swapped=true;}} if(!swapped) break;}}
-    private void selectionSortPure(int[] a){for(int i=0;i<a.length-1;i++){int max=i;for(int j=i+1;j<a.length;j++) if(a[j]>a[max]) max=j; swap(a,i,max);}}
-    private void insertionSortPure(int[] a){for(int i=1;i<a.length;i++){int key=a[i],j=i-1;while(j>=0 && a[j]<key){a[j+1]=a[j]; j--;} a[j+1]=key;}}
-    private void mergeSortPure(int[] a,int l,int r){if(l>=r) return; int m=(l+r)/2; mergeSortPure(a,l,m); mergeSortPure(a,m+1,r); mergePure(a,l,m,r);}
-    private void mergePure(int[] a,int l,int m,int r){int[] t=new int[r-l+1]; int i=l,j=m+1,k=0; while(i<=m&&j<=r) t[k++]=a[i]>a[j]?a[i++]:a[j++]; while(i<=m) t[k++]=a[i++]; while(j<=r) t[k++]=a[j++]; System.arraycopy(t,0,a,l,t.length);}
-    private void quickSortPure(int[] a,int l,int h,boolean random){if(l<h){int p=partitionPure(a,l,h,random); quickSortPure(a,l,p-1,random); quickSortPure(a,p+1,h,random);}}
-    private int partitionPure(int[] a,int l,int h,boolean random){if(random) swap(a,l+(int)(Math.random()*(h-l+1)),h); int pivot=a[h],i=l-1; for(int j=l;j<h;j++) if(a[j]>pivot) swap(a,++i,j); swap(a,i+1,h); return i+1;}
+    private void bubbleSortPure(int[] a) { 
+        for (int i = 0; i < a.length - 1; i++) { 
+            boolean swapped=false; 
+            for (int j=0;j<a.length-i-1;j++){
+                if(a[j]<a[j+1]){swap(a,j,j+1);swapped=true;}
+            } 
+            if(!swapped) break;
+        }
+    }
+    private void selectionSortPure(int[] a){
+        for(int i=0;i<a.length-1;i++){
+            int max=i;
+            for(int j=i+1;j<a.length;j++) if(a[j]>a[max]) max=j;
+            swap(a,i,max);
+        }
+    }
+    private void insertionSortPure(int[] a){
+        for(int i=1;i<a.length;i++){
+            int key=a[i], j=i-1;
+            while(j>=0 && a[j]<key){a[j+1]=a[j]; j--;}
+            a[j+1]=key;
+        }
+    }
+    private void mergeSortPure(int[] a,int l,int r){
+        if(l>=r) return;
+        int m=(l+r)/2;
+        mergeSortPure(a,l,m);
+        mergeSortPure(a,m+1,r);
+        mergePure(a,l,m,r);
+    }
+    private void mergePure(int[] a,int l,int m,int r){
+        int[] t=new int[r-l+1];
+        int i=l,j=m+1,k=0;
+        while(i<=m && j<=r) t[k++]=a[i]>a[j]?a[i++]:a[j++];
+        while(i<=m) t[k++]=a[i++];
+        while(j<=r) t[k++]=a[j++];
+        System.arraycopy(t,0,a,l,t.length);
+    }
+    private void quickSortPure(int[] a,int l,int h,boolean random){
+        if(l<h){
+            int p=partitionPure(a,l,h,random);
+            quickSortPure(a,l,p-1,random);
+            quickSortPure(a,p+1,h,random);
+        }
+    }
+    private int partitionPure(int[] a,int l,int h,boolean random){
+        if(random) swap(a,l+(int)(Math.random()*(h-l+1)),h);
+        int pivot=a[h],i=l-1;
+        for(int j=l;j<h;j++) if(a[j]>pivot) swap(a,++i,j);
+        swap(a,i+1,h);
+        return i+1;
+    }
     private void swap(int[] a,int x,int y){int t=a[x];a[x]=a[y];a[y]=t;}
 
     /* ===================== VISUAL SORT ===================== */
@@ -227,13 +268,26 @@ public class SortVisualizerGUI extends JFrame {
         timer.start();
     }
 
-    private void stopVisualization() { if(timer!=null) timer.stop(); playButton.setEnabled(true); stopButton.setEnabled(false);}
-    private void resetVisualization() { if(originalArray!=null){visualArray=originalArray.clone(); i=j=0; barPanel.repaint();}}
+    private void stopVisualization() { 
+        if(timer!=null) timer.stop(); 
+        playButton.setEnabled(true); 
+        stopButton.setEnabled(false);
+    }
+    private void resetVisualization() { 
+        if(originalArray!=null){visualArray=originalArray.clone(); i=j=0; barPanel.repaint();}
+    }
 
     /* ===================== HELPERS ===================== */
     private int getInvertedDelay(){return MAX_DELAY-speedSlider.getValue()+MIN_DELAY;}
     private int findMax(int[] a){int m=a[0]; for(int v:a)m=Math.max(m,v); return m;}
-    private JButton createButton(String t){JButton b=new JButton(t); b.setBackground(new Color(50,80,130)); b.setForeground(TEXT); b.setFocusPainted(false); b.setPreferredSize(new Dimension(150,38)); return b;}
+    private JButton createButton(String t){
+        JButton b=new JButton(t); 
+        b.setBackground(new Color(50,80,130)); 
+        b.setForeground(TEXT); 
+        b.setFocusPainted(false); 
+        b.setPreferredSize(new Dimension(150,38)); 
+        return b;
+    }
     private File chooseFile(){JFileChooser fc=new JFileChooser(); return fc.showOpenDialog(this)==JFileChooser.APPROVE_OPTION?fc.getSelectedFile():null;}
 
     /* ===================== BAR PANEL ===================== */
@@ -244,7 +298,6 @@ public class SortVisualizerGUI extends JFrame {
             if (visualArray==null) return;
             int width = getWidth();
             int height = getHeight() - 20;
-
             int barWidth = Math.max(width / visualArray.length, MIN_BAR_WIDTH);
             for(int k=0;k<visualArray.length;k++){
                 Color barColor = (k >= visualArray.length - i)?SORTED:(k==j||k==j+1)?COMPARE:BAR;
@@ -253,10 +306,12 @@ public class SortVisualizerGUI extends JFrame {
                 g.fillRect(k*barWidth, height-bh, barWidth-1, bh);
             }
         }
-        public Dimension getPreferredSize(){ return visualArray==null?super.getPreferredSize(): new Dimension(Math.max(visualArray.length*MIN_BAR_WIDTH, getWidth()), 500);}
+        public Dimension getPreferredSize(){ 
+            return visualArray==null?super.getPreferredSize(): new Dimension(Math.max(visualArray.length*MIN_BAR_WIDTH, getWidth()), 500);
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SortVisualizerGUI().setVisible(true));
+        SwingUtilities.invokeLater(() -> new BubbleSortGUI().setVisible(true));
     }
 }
