@@ -119,7 +119,7 @@ public class SortVisualizerGUI extends JFrame {
         add(controls, BorderLayout.SOUTH);
     }
 
-    /* ===================== DATA LOADING & NORMALIZATION ===================== */
+    /* ===================== DATA LOADING & DISPLAY ===================== */
     private void loadDataset() {
         File file = chooseFile();
         if (file == null) return;
@@ -133,19 +133,25 @@ public class SortVisualizerGUI extends JFrame {
             originalArray = list.stream().mapToInt(i -> i).toArray();
             maxValue = findMax(originalArray);
 
-            // Normalize values for visualization (scale between 1 and panel height)
-            visualArray = new int[originalArray.length];
-            for (int k = 0; k < originalArray.length; k++)
-                visualArray[k] = originalArray[k]; // keep raw, scale dynamically in paint
+            // Initialize visual array
+            visualArray = originalArray.clone();
 
+            // Measure algorithm time
             algorithmTimeSeconds = measureAlgorithmTime();
 
+            // Generate sorted array for display
+            int[] sortedArray = originalArray.clone();
+            sortArray(sortedArray);
+
+            // Update text area with dataset info, original, sorted arrays
             outputArea.setText(
-                    "📁 Dataset: " + file.getName() + "\n\n" +
+                    "📁 Dataset: " + file.getName() + "\n" +
                     "Array Size: " + originalArray.length + "\n" +
                     "Algorithm: " + currentAlgorithm + "\n" +
                     String.format("⏱ Algorithm Time: %.6f seconds\n", algorithmTimeSeconds) +
-                    "\n▶ Press Play to visualize"
+                    "\nOriginal Array:\n" + arrayToString(originalArray) +
+                    "\n\nSorted Array (Descending):\n" + arrayToString(sortedArray) +
+                    "\n\n▶ Press Play to visualize"
             );
 
             resetVisualization();
@@ -157,10 +163,18 @@ public class SortVisualizerGUI extends JFrame {
         }
     }
 
-    private double measureAlgorithmTime() {
-        int[] arr = originalArray.clone();
-        long start = System.nanoTime();
+    /* ===================== ARRAY HELPERS ===================== */
+    private String arrayToString(int[] arr) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < arr.length; i++) {
+            sb.append(arr[i]);
+            if (i < arr.length - 1) sb.append(", ");
+            if ((i + 1) % 20 == 0) sb.append("\n"); // break line every 20 numbers
+        }
+        return sb.toString();
+    }
 
+    private void sortArray(int[] arr) {
         switch (currentAlgorithm) {
             case "Bubble Sort": bubbleSortPure(arr); break;
             case "Selection Sort": selectionSortPure(arr); break;
@@ -169,11 +183,16 @@ public class SortVisualizerGUI extends JFrame {
             case "Quick Sort": quickSortPure(arr, 0, arr.length - 1, false); break;
             case "Random Quick Sort": quickSortPure(arr, 0, arr.length - 1, true); break;
         }
+    }
 
+    private double measureAlgorithmTime() {
+        int[] arr = originalArray.clone();
+        long start = System.nanoTime();
+        sortArray(arr);
         return (System.nanoTime() - start) / 1_000_000_000.0;
     }
 
-    /* ===================== PURE SORTS (unchanged) ===================== */
+    /* ===================== PURE SORTS ===================== */
     private void bubbleSortPure(int[] a) { for (int i = 0; i < a.length - 1; i++) { boolean swapped=false; for (int j=0;j<a.length-i-1;j++){if(a[j]<a[j+1]){swap(a,j,j+1);swapped=true;}} if(!swapped) break;}}
     private void selectionSortPure(int[] a){for(int i=0;i<a.length-1;i++){int max=i;for(int j=i+1;j<a.length;j++) if(a[j]>a[max]) max=j; swap(a,i,max);}}
     private void insertionSortPure(int[] a){for(int i=1;i<a.length;i++){int key=a[i],j=i-1;while(j>=0 && a[j]<key){a[j+1]=a[j]; j--;} a[j+1]=key;}}
