@@ -4,31 +4,34 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-public class BubbleSortGUI extends JFrame {
+public class SortVisualizerGUI extends JFrame {
 
     /* ===================== DATA ===================== */
     private int[] originalArray;
     private int[] visualArray;
     private int maxValue;
 
-    /* ===================== SORT STATE ===================== */
+    /* ===================== VISUAL STATE ===================== */
     private int i = 0, j = 0;
     private boolean swapped = false;
     private Timer timer;
 
-    /* ===================== UI COMPONENTS ===================== */
+    /* ===================== TIMING ===================== */
+    private double algorithmTimeSeconds;
+
+    /* ===================== UI ===================== */
     private JTextArea outputArea;
     private BarPanel barPanel;
-
-    private JButton loadButton;
-    private JButton playButton;
-    private JButton stopButton;
-    private JButton replayButton;
-    private JButton clearButton;
-
+    private JButton loadButton, playButton, stopButton, replayButton, clearButton;
     private JSlider speedSlider;
+    private JComboBox<String> algorithmBox;
+    private String currentAlgorithm = "Bubble Sort";
 
-    /* ===================== COLORS ===================== */
+    /* ===================== SETTINGS ===================== */
+    private static final int MIN_DELAY = 5;
+    private static final int MAX_DELAY = 200;
+    private static final int MIN_BAR_WIDTH = 4;
+
     private final Color BG = new Color(30, 30, 30);
     private final Color PANEL = new Color(40, 40, 40);
     private final Color TEXT = new Color(220, 220, 220);
@@ -37,43 +40,41 @@ public class BubbleSortGUI extends JFrame {
     private final Color COMPARE = new Color(255, 193, 7);
     private final Color SORTED = new Color(40, 167, 69);
 
-    public BubbleSortGUI() {
-        setTitle("Bubble Sort (Descending) – Visualizer");
+    public SortVisualizerGUI() {
+        setTitle("Sorting Algorithm Visualizer");
         setSize(1200, 650);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initUI();
     }
 
-    /* ===================== UI SETUP ===================== */
+    /* ===================== UI ===================== */
     private void initUI() {
+        setLayout(new BorderLayout());
         getContentPane().setBackground(BG);
-        setLayout(new BorderLayout(10, 10));
 
-        JLabel title = new JLabel("Bubble Sort (Descending Order)", JLabel.CENTER);
+        JLabel title = new JLabel("Sorting Algorithm Visualizer (Descending)", JLabel.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(ACCENT);
         title.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setResizeWeight(0.6);
-        splitPane.setBorder(null);
-
         barPanel = new BarPanel();
-        splitPane.setLeftComponent(barPanel);
-
         outputArea = new JTextArea();
         outputArea.setEditable(false);
         outputArea.setFont(new Font("Consolas", Font.PLAIN, 13));
         outputArea.setBackground(PANEL);
         outputArea.setForeground(TEXT);
-        outputArea.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        splitPane.setRightComponent(new JScrollPane(outputArea));
-        add(splitPane, BorderLayout.CENTER);
+        JSplitPane split = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                new JScrollPane(barPanel),
+                new JScrollPane(outputArea)
+        );
+        split.setResizeWeight(0.65);
+        add(split, BorderLayout.CENTER);
 
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel controls = new JPanel(new FlowLayout());
         controls.setBackground(BG);
 
         loadButton = createButton("Load Dataset");
@@ -86,78 +87,166 @@ public class BubbleSortGUI extends JFrame {
         stopButton.setEnabled(false);
         replayButton.setEnabled(false);
 
-        speedSlider = new JSlider(5, 200, 30);
+        speedSlider = new JSlider(MIN_DELAY, MAX_DELAY, 30);
         speedSlider.setPreferredSize(new Dimension(160, 40));
-        speedSlider.setBackground(BG);
-        speedSlider.setForeground(TEXT);
-        speedSlider.setToolTipText("Animation Speed");
-
         speedSlider.addChangeListener(e -> {
-            if (timer != null) {
-                timer.setDelay(speedSlider.getValue());
-            }
+            if (timer != null) timer.setDelay(getInvertedDelay());
         });
+
+        algorithmBox = new JComboBox<>(new String[]{
+                "Bubble Sort", "Selection Sort", "Insertion Sort",
+                "Merge Sort", "Quick Sort", "Random Quick Sort"
+        });
+        algorithmBox.addActionListener(e ->
+                currentAlgorithm = (String) algorithmBox.getSelectedItem()
+        );
 
         loadButton.addActionListener(e -> loadDataset());
         playButton.addActionListener(e -> startVisualization());
         stopButton.addActionListener(e -> stopVisualization());
-        replayButton.addActionListener(e -> replayVisualization());
+        replayButton.addActionListener(e -> resetVisualization());
         clearButton.addActionListener(e -> outputArea.setText(""));
 
         controls.add(loadButton);
         controls.add(playButton);
         controls.add(stopButton);
         controls.add(replayButton);
-        controls.add(new JLabel("Speed"));
+        controls.add(algorithmBox);
         controls.add(speedSlider);
         controls.add(clearButton);
 
         add(controls, BorderLayout.SOUTH);
     }
 
-    /* ===================== DATA LOADING ===================== */
+    /* ===================== DATA LOADING & TIMING ===================== */
     private void loadDataset() {
         File file = chooseFile();
         if (file == null) return;
 
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             ArrayList<Integer> list = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null)
                 list.add(Integer.parseInt(line.trim()));
-            }
-            br.close();
 
             originalArray = list.stream().mapToInt(i -> i).toArray();
             visualArray = originalArray.clone();
             maxValue = findMax(originalArray);
 
+            algorithmTimeSeconds = measureAlgorithmTime();
+
             outputArea.setText(
-                "📁 Dataset File: " + file.getName() + "\n\n" +
-                "Original Array:\n" + arrayToString(originalArray) + "\n\n" +
-                "Array Size: " + originalArray.length + "\n" +
-                "Algorithm: Bubble Sort (Descending)"
+                    "📁 Dataset: " + file.getName() + "\n\n" +
+                    "Array Size: " + originalArray.length + "\n" +
+                    "Algorithm: " + currentAlgorithm + "\n" +
+                    String.format("⏱ Algorithm Time: %.6f seconds\n", algorithmTimeSeconds) +
+                    "\n▶ Press Play to visualize"
             );
 
-            i = j = 0;
-            swapped = false;
+            resetVisualization();
             playButton.setEnabled(true);
             replayButton.setEnabled(true);
-            barPanel.repaint();
 
         } catch (Exception e) {
-            outputArea.setText("❌ Error reading dataset\n" + e.getMessage());
+            outputArea.setText("❌ Error loading dataset\n" + e.getMessage());
         }
+    }
+
+    private double measureAlgorithmTime() {
+        int[] arr = originalArray.clone();
+        long start = System.nanoTime();
+
+        switch (currentAlgorithm) {
+            case "Bubble Sort": bubbleSortPure(arr); break;
+            case "Selection Sort": selectionSortPure(arr); break;
+            case "Insertion Sort": insertionSortPure(arr); break;
+            case "Merge Sort": mergeSortPure(arr, 0, arr.length - 1); break;
+            case "Quick Sort": quickSortPure(arr, 0, arr.length - 1, false); break;
+            case "Random Quick Sort": quickSortPure(arr, 0, arr.length - 1, true); break;
+        }
+
+        return (System.nanoTime() - start) / 1_000_000_000.0;
+    }
+
+    /* ===================== PURE SORTS ===================== */
+    private void bubbleSortPure(int[] a) {
+        for (int i = 0; i < a.length - 1; i++) {
+            boolean swapped = false;
+            for (int j = 0; j < a.length - i - 1; j++) {
+                if (a[j] < a[j + 1]) {
+                    swap(a, j, j + 1);
+                    swapped = true;
+                }
+            }
+            if (!swapped) break;
+        }
+    }
+
+    private void selectionSortPure(int[] a) {
+        for (int i = 0; i < a.length - 1; i++) {
+            int max = i;
+            for (int j = i + 1; j < a.length; j++)
+                if (a[j] > a[max]) max = j;
+            swap(a, i, max);
+        }
+    }
+
+    private void insertionSortPure(int[] a) {
+        for (int i = 1; i < a.length; i++) {
+            int key = a[i], j = i - 1;
+            while (j >= 0 && a[j] < key) {
+                a[j + 1] = a[j];
+                j--;
+            }
+            a[j + 1] = key;
+        }
+    }
+
+    private void mergeSortPure(int[] a, int l, int r) {
+        if (l >= r) return;
+        int m = (l + r) / 2;
+        mergeSortPure(a, l, m);
+        mergeSortPure(a, m + 1, r);
+        mergePure(a, l, m, r);
+    }
+
+    private void mergePure(int[] a, int l, int m, int r) {
+        int[] t = new int[r - l + 1];
+        int i = l, j = m + 1, k = 0;
+        while (i <= m && j <= r)
+            t[k++] = a[i] > a[j] ? a[i++] : a[j++];
+        while (i <= m) t[k++] = a[i++];
+        while (j <= r) t[k++] = a[j++];
+        System.arraycopy(t, 0, a, l, t.length);
+    }
+
+    private void quickSortPure(int[] a, int l, int h, boolean random) {
+        if (l < h) {
+            int p = partitionPure(a, l, h, random);
+            quickSortPure(a, l, p - 1, random);
+            quickSortPure(a, p + 1, h, random);
+        }
+    }
+
+    private int partitionPure(int[] a, int l, int h, boolean random) {
+        if (random) swap(a, l + (int) (Math.random() * (h - l + 1)), h);
+        int pivot = a[h], i = l - 1;
+        for (int j = l; j < h; j++)
+            if (a[j] > pivot) swap(a, ++i, j);
+        swap(a, i + 1, h);
+        return i + 1;
     }
 
     /* ===================== VISUAL SORT ===================== */
     private void startVisualization() {
+        stopVisualization();
         playButton.setEnabled(false);
         stopButton.setEnabled(true);
+        i = j = 0;
+        swapped = false;
 
-        timer = new Timer(speedSlider.getValue(), e -> {
-            if (i < visualArray.length) {
+        timer = new Timer(getInvertedDelay(), e -> {
+            if (i < visualArray.length - 1) {
                 if (j < visualArray.length - i - 1) {
                     if (visualArray[j] < visualArray[j + 1]) {
                         swap(visualArray, j, j + 1);
@@ -175,7 +264,6 @@ public class BubbleSortGUI extends JFrame {
                 stopVisualization();
             }
         });
-
         timer.start();
     }
 
@@ -185,105 +273,65 @@ public class BubbleSortGUI extends JFrame {
         stopButton.setEnabled(false);
     }
 
-    private void replayVisualization() {
-        stopVisualization();
-        visualArray = originalArray.clone();
-        i = j = 0;
-        swapped = false;
-        barPanel.repaint();
+    private void resetVisualization() {
+        if (originalArray != null) {
+            visualArray = originalArray.clone();
+            i = j = 0;
+            barPanel.repaint();
+        }
     }
 
     /* ===================== HELPERS ===================== */
-    private int findMax(int[] arr) {
-        int max = arr[0];
-        for (int v : arr) max = Math.max(max, v);
-        return max;
+    private int getInvertedDelay() {
+        return MAX_DELAY - speedSlider.getValue() + MIN_DELAY;
     }
 
-    private void swap(int[] arr, int a, int b) {
-        int t = arr[a];
-        arr[a] = arr[b];
-        arr[b] = t;
+    private int findMax(int[] a) {
+        int m = a[0];
+        for (int v : a) m = Math.max(m, v);
+        return m;
     }
 
-    private String arrayToString(int[] arr) {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < arr.length; i++) {
-            sb.append(arr[i]);
-            if (i < arr.length - 1) sb.append(", ");
-        }
-        return sb.append("]").toString();
+    private void swap(int[] a, int x, int y) {
+        int t = a[x]; a[x] = a[y]; a[y] = t;
     }
 
-    private File chooseFile() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Select Dataset File");
-        return chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION
-                ? chooser.getSelectedFile() : null;
-    }
-
-    private JButton createButton(String text) {
-        JButton b = new JButton(text);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 13));
+    private JButton createButton(String t) {
+        JButton b = new JButton(t);
         b.setBackground(new Color(60, 60, 60));
         b.setForeground(TEXT);
         b.setFocusPainted(false);
-        b.setBorder(BorderFactory.createLineBorder(ACCENT));
         b.setPreferredSize(new Dimension(150, 38));
         return b;
     }
 
-    /* ===================== BAR VISUALIZER ===================== */
+    private File chooseFile() {
+        JFileChooser fc = new JFileChooser();
+        return fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION ? fc.getSelectedFile() : null;
+    }
+
+    /* ===================== BAR PANEL ===================== */
     private class BarPanel extends JPanel {
-
-        BarPanel() {
-            setBackground(PANEL);
-            setDoubleBuffered(true);
-        }
-
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (visualArray == null) return;
 
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON);
-
-            int width = getWidth();
-            int height = getHeight();
-            int usableHeight = height - 40;
-
-            int barWidth = Math.max(2, width / visualArray.length);
-
+            int h = getHeight() - 20;
             for (int k = 0; k < visualArray.length; k++) {
-
-                if (k >= visualArray.length - i)
-                    g2.setColor(SORTED);
-                else if (k == j || k == j + 1)
-                    g2.setColor(COMPARE);
-                else
-                    g2.setColor(BAR);
-
-                double ratio = visualArray[k] / (double) maxValue;
-                int barHeight = (int) (ratio * usableHeight);
-
-                int x = k * barWidth;
-                int y = height - barHeight - 10;
-
-                g2.fillRoundRect(
-                    x,
-                    y,
-                    barWidth - 1,
-                    barHeight,
-                    4,
-                    4
-                );
+                g.setColor(k >= visualArray.length - i ? SORTED :
+                           (k == j || k == j + 1 ? COMPARE : BAR));
+                int bh = (int)((double)visualArray[k] / maxValue * h);
+                g.fillRect(k * MIN_BAR_WIDTH, h - bh, MIN_BAR_WIDTH - 1, bh);
             }
+        }
+
+        public Dimension getPreferredSize() {
+            return visualArray == null ? super.getPreferredSize()
+                    : new Dimension(visualArray.length * MIN_BAR_WIDTH, 500);
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new BubbleSortGUI().setVisible(true));
+        SwingUtilities.invokeLater(() -> new SortVisualizerGUI().setVisible(true));
     }
 }
