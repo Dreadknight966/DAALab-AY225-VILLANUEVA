@@ -163,6 +163,47 @@ A,B,5,10,0.5
 B,C,4,8,0.4
 A,C,10,15,0.9
 C,D,7,12,0.7
+
+🧠 Algorithm Used
+
+This project uses two main algorithms to generate and analyze the node network.
+
+Algorithm	Purpose
+🌐 Force-Directed Graph Layout (Barnes–Hut)	Automatically positions nodes in the network
+📍 Dijkstra’s Algorithm	Finds the shortest path between nodes
+🌐 Network Layout
+
+The visualization uses the Barnes–Hut force-directed layout provided by the vis-network library.
+
+In this simulation:
+
+🔋 Nodes repel each other
+
+🪢 Edges act like springs pulling connected nodes together
+
+🌍 Gravity keeps the graph centered
+
+This physics-based layout automatically spreads nodes so the network remains clear and readable.
+
+📍 Shortest Path Algorithm
+
+To find the optimal route between nodes, the program uses Dijkstra’s Algorithm, which works on a weighted graph.
+
+Each edge contains three possible weights:
+
+📏 Distance (km)
+
+⏱ Time (mins)
+
+⛽ Fuel (liters)
+
+The user selects which metric to optimize, and the algorithm finds the minimum cost path between the selected start and end nodes.
+
+Example
+A → B → D → F
+
+The selected route is then highlighted in the network visualization, while other nodes and edges are dimmed.
+
 📂 Project Structure
 network-path-finder
 │
