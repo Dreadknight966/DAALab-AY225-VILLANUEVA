@@ -1,125 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuraLink Systems | Innovation Hub</title>
-    <style>
-        /* Modern Retro Aesthetic & High Visibility */
-        :root {
-            --bg-color: #0f172a;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --card-bg: #1e293b;
-        }
- 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            line-height: 1.6;
-            /* Large base font for high-visibility */
-            font-size: 1.25rem;
-        }
- 
-        header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 2px solid var(--accent-color);
-        }
- 
-        .hero {
-            padding: 4rem 2rem;
-            text-align: center;
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-        }
- 
-        .hero h1 {
-            font-size: 3.5rem; /* Large for 10m viewing */
-            margin-bottom: 1rem;
-            color: var(--accent-color);
-        }
- 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 2rem;
-        }
- 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
- 
-        .card {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: 8px;
-            border-left: 5px solid var(--accent-color);
-        }
- 
-        .card h2 {
-            margin-top: 0;
-            color: var(--accent-color);
-        }
- 
-        .edit-zone {
-            background-color: #fef08a;
-            color: #164e63;
-            padding: 1rem;
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 3rem;
-        }
- 
-        footer {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1rem;
-            opacity: 0.7;
-        }
- 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 2.5rem; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Artifact Template</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <!-- Google Fonts: Syne (display) + DM Mono (data/mono) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
- 
-    <header>
-        <div class="logo"><strong>NEURALINK</strong> SYSTEMS</div>
-    </header>
- 
-    <section class="hero">
-        <h1>Engineering the Future</h1>
-        <p>Advanced Infrastructure & Intelligent Automation Solutions</p>
-    </section>
- 
-    <div class="container">
-        <div class="feature-grid">
-            <div class="card">
-                <h2>Network Strategy</h2>
-                <p>Scaling global connectivity through robust, secure, and low-latency infrastructure design.</p>
-            </div>
-            <div class="card">
-                <h2>AI Integration</h2>
-                <p>Moving beyond standard RPA into agentic workflows and intelligent system management.</p>
-            </div>
+<body class="light-theme">
+
+  <!-- ═══════════════════════════════ STICKY HEADER ═══════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-bracket">[</span>
+        <h1 class="header-title">Data Artifact Template</h1>
+        <span class="header-bracket">]</span>
+      </div>
+
+      <nav class="header-controls" aria-label="Site controls">
+        <div class="header-meta">
+          <span class="header-meta-label">v1.0.0</span>
+          <span class="header-meta-sep">·</span>
+          <span class="header-meta-label" id="headerTimestamp">--:--:--</span>
         </div>
- 
-        <div class="edit-zone">
-            Collaborator Exercise: Replace this text with your name and today's date to verify the push!
-        </div>
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          aria-label="Toggle light/dark mode"
+          title="Toggle theme"
+        >
+          <i class="fa-solid fa-sun toggle-icon toggle-icon--sun" aria-hidden="true"></i>
+          <i class="fa-solid fa-moon toggle-icon toggle-icon--moon" aria-hidden="true"></i>
+          <span class="toggle-track" aria-hidden="true"></span>
+        </button>
+      </nav>
     </div>
- 
-    <footer>
-        &copy; 2026 NeuraLink Systems. Built for Git Collaboration Training.
-    </footer>
- 
+
+    <!-- Animated progress line under header -->
+    <div class="header-rule" aria-hidden="true">
+      <div class="header-rule-fill" id="scrollProgress"></div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════ MAIN CONTENT ═══════════════════════════════ -->
+  <main class="site-main" id="main-content">
+
+    <!-- ─────────────────────── SECTION 1: HERO / STATUS ─────────────────────── -->
+    <section class="section section--hero" id="section-status" aria-labelledby="hero-heading">
+      <div class="section-inner">
+
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="hero-eyebrow">
+              <span class="eyebrow-line" aria-hidden="true"></span>
+              Dashboard Overview
+            </p>
+            <h2 class="hero-heading" id="hero-heading">
+              Insight at a<br />
+              <em class="hero-heading-accent">Glance</em>
+            </h2>
+            <p class="hero-body">
+              A lightweight, fully static dashboard template. Drop in your
+              <code>assets/data.json</code> and the charts and tables
+              populate automatically — no build step required.
+            </p>
+          </div>
+
+          <div class="hero-status-panel" role="region" aria-label="Data status panel">
+            <!-- Status indicator card -->
+            <div class="status-card" id="statusCard">
+              <div class="status-card-header">
+                <span class="status-card-label">
+                  <i class="fa-solid fa-database" aria-hidden="true"></i>
+                  Data Status
+                </span>
+                <span class="status-badge status-badge--pending" id="statusBadge" role="status" aria-live="polite">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  Pending
+                </span>
+              </div>
+              <div class="status-card-body">
+                <dl class="status-stats" id="statusStats">
+                  <div class="status-stat">
+                    <dt class="status-stat-label">Records</dt>
+                    <dd class="status-stat-value" id="statRecords">—</dd>
+                  </div>
+                  <div class="status-stat">
+                    <dt class="status-stat-label">Fields</dt>
+                    <dd class="status-stat-value" id="statFields">—</dd>
+                  </div>
+                  <div class="status-stat">
+                    <dt class="status-stat-label">Source</dt>
+                    <dd class="status-stat-value status-stat-value--mono" id="statSource">data.json</dd>
+                  </div>
+                  <div class="status-stat">
+                    <dt class="status-stat-label">Loaded</dt>
+                    <dd class="status-stat-value status-stat-value--mono" id="statLoaded">—</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="status-card-footer">
+                <div class="status-progress-track" aria-hidden="true">
+                  <div class="status-progress-bar" id="statusProgressBar"></div>
+                </div>
+                <p class="status-message" id="statusMessage">Awaiting data fetch…</p>
+              </div>
+            </div>
+
+            <!-- Quick key-value metric tiles (populated by JS) -->
+            <div class="metric-tiles" id="metricTiles" aria-label="Key metrics" role="list">
+              <!-- JS will inject <article> tiles here -->
+              <article class="metric-tile metric-tile--skeleton" role="listitem" aria-busy="true">
+                <span class="metric-tile-label skeleton-text">Loading</span>
+                <span class="metric-tile-value skeleton-text">—</span>
+              </article>
+              <article class="metric-tile metric-tile--skeleton" role="listitem" aria-busy="true">
+                <span class="metric-tile-label skeleton-text">Loading</span>
+                <span class="metric-tile-value skeleton-text">—</span>
+              </article>
+              <article class="metric-tile metric-tile--skeleton" role="listitem" aria-busy="true">
+                <span class="metric-tile-label skeleton-text">Loading</span>
+                <span class="metric-tile-value skeleton-text">—</span>
+              </article>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ────────────────────── SECTION 2: CHART CANVAS ─────────────────────────── -->
+    <section class="section section--chart" id="section-chart" aria-labelledby="chart-heading">
+      <div class="section-inner">
+
+        <header class="section-header">
+          <div class="section-header-left">
+            <span class="section-number" aria-hidden="true">02</span>
+            <h2 class="section-heading" id="chart-heading">Visualization</h2>
+          </div>
+          <div class="section-header-right">
+            <div class="chart-controls" role="group" aria-label="Chart type controls">
+              <button class="chart-type-btn chart-type-btn--active" data-chart-type="line" aria-pressed="true">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                <span>Line</span>
+              </button>
+              <button class="chart-type-btn" data-chart-type="bar" aria-pressed="false">
+                <i class="fa-solid fa-chart-bar" aria-hidden="true"></i>
+                <span>Bar</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="chart-outer">
+          <div class="chart-container" id="chartContainer" role="img" aria-label="Data visualization chart">
+            <!-- Chart.js canvas injected by app.js -->
+            <div class="chart-placeholder" id="chartPlaceholder" aria-hidden="true">
+              <div class="chart-placeholder-grid" aria-hidden="true"></div>
+              <p class="chart-placeholder-label">
+                <i class="fa-solid fa-chart-area" aria-hidden="true"></i>
+                Chart renders after data loads
+              </p>
+            </div>
+          </div>
+
+          <aside class="chart-legend-panel" id="chartLegendPanel" aria-label="Chart legend">
+            <!-- JS populates legend entries here -->
+            <p class="legend-placeholder">Legend loads with data</p>
+          </aside>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─────────────────────── SECTION 3: DATA GRID ──────────────────────────── -->
+    <section class="section section--table" id="section-table" aria-labelledby="table-heading">
+      <div class="section-inner">
+
+        <header class="section-header">
+          <div class="section-header-left">
+            <span class="section-number" aria-hidden="true">03</span>
+            <h2 class="section-heading" id="table-heading">Data Grid</h2>
+          </div>
+          <div class="section-header-right">
+            <div class="table-controls">
+              <label class="table-search-label" for="tableSearch">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <span class="sr-only">Search table</span>
+              </label>
+              <input
+                class="table-search-input"
+                type="search"
+                id="tableSearch"
+                placeholder="Filter rows…"
+                aria-label="Filter table rows"
+                disabled
+              />
+              <span class="table-row-count" id="tableRowCount" aria-live="polite">— rows</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="table-wrapper" id="tableWrapper" tabindex="0" role="region" aria-label="Scrollable data table">
+          <!-- Dynamic <table> injected by app.js -->
+          <div class="table-placeholder" id="tablePlaceholder">
+            <div class="table-placeholder-rows" aria-hidden="true">
+              <div class="table-placeholder-header"></div>
+              <div class="table-placeholder-row"></div>
+              <div class="table-placeholder-row"></div>
+              <div class="table-placeholder-row"></div>
+              <div class="table-placeholder-row"></div>
+              <div class="table-placeholder-row"></div>
+            </div>
+            <p class="table-placeholder-label">
+              <i class="fa-solid fa-table" aria-hidden="true"></i>
+              Table populates after data loads
+            </p>
+          </div>
+        </div>
+
+        <footer class="table-footer">
+          <p class="table-footer-note" id="tableFooterNote">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            Data sourced from <code>assets/data.json</code>
+          </p>
+          <button class="btn-export" id="btnExportCsv" disabled aria-label="Export table data as CSV">
+            <i class="fa-solid fa-download" aria-hidden="true"></i>
+            Export CSV
+          </button>
+        </footer>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════ SITE FOOTER ═══════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Data Artifact Template &mdash; Static &bull; GitHub Pages ready
+      </p>
+      <p class="footer-tech">
+        Built with
+        <a href="https://www.chartjs.org/" target="_blank" rel="noopener noreferrer">Chart.js</a>
+        &amp; vanilla JS
+      </p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════ THEME TOGGLE SCRIPT ═══════════════════════════ -->
+  <script>
+    (() => {
+      const STORAGE_KEY = 'dat-theme';
+      const body = document.body;
+      const btn = document.getElementById('themeToggle');
+
+      // Apply saved or system-preferred theme immediately (before paint)
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = saved ?? (prefersDark ? 'dark-theme' : 'light-theme');
+      body.className = initialTheme;
+
+      function syncToggleAriaLabel() {
+        const isDark = body.classList.contains('dark-theme');
+        btn.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} mode`);
+        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      }
+      syncToggleAriaLabel();
+
+      btn.addEventListener('click', () => {
+        const isDark = body.classList.contains('dark-theme');
+        body.classList.replace(
+          isDark ? 'dark-theme' : 'light-theme',
+          isDark ? 'light-theme' : 'dark-theme'
+        );
+        localStorage.setItem(STORAGE_KEY, body.className);
+        syncToggleAriaLabel();
+      });
+
+      // Live clock in header
+      const tsEl = document.getElementById('headerTimestamp');
+      function tick() {
+        tsEl.textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      // Scroll-progress bar
+      const progressBar = document.getElementById('scrollProgress');
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = docHeight > 0 ? `${(scrollTop / docHeight) * 100}%` : '0%';
+      }, { passive: true });
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════ APP SCRIPT ════════════════════════════════ -->
+  <script src="app.js" defer></script>
+
 </body>
 </html>
